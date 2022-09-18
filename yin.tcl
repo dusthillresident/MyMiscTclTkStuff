@@ -8,7 +8,7 @@ tk appname "Yin-Yang"
 
 set PI 3.1415926535897931
 
-set rotangle 0.0
+set rotangle 1.0
 set scalefactor 1.0
 
 set mybgcol \#7f7f7f
