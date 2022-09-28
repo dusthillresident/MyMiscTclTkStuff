@@ -12,7 +12,7 @@ frame .f
 
 for {set i 1} {$i <= 4} {incr i} {
  label .f.label_$i -image [image create photo .image_$i]
- .image_$i put \#000 -to 0 0 $maxw $maxh
+ .image_$i put "#000" -to 0 0 $maxw $maxh
 }
 
 grid .f.label_1 .f.label_2
@@ -34,8 +34,6 @@ proc pixel {x y c} {
 }
 
 proc randomcolour {} {
- #return [lindex { #000 #00f #0f0 #0ff #f00 #f0f #ff0 #fff
- #} [expr {int(rand()*8)}] ]
  return [rgb [expr {rand()*255}] [expr {rand()*255}] [expr {rand()*255}]]
 }
 
@@ -65,7 +63,6 @@ proc render {} {
  set img .image_1
  for {set x 0} {$x<$maxw} {incr x} {
   for {set y 0} {$y<$maxh} {incr y} {
-   #pixel $x $y [randomcolour]
    pixel $x $y [rgb [expr {($x ^ $y)}] [expr {($x ^ $y)<<1}] [expr {($x ^ $y)<<2}]]
   }
  }
