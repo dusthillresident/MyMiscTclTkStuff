@@ -1,9 +1,12 @@
 package require Tk
 
+wm title . "Image Demo"
+
 set img .image_1
 set maxw 192
 set maxh 192
 
+frame .top
 frame .f
 
 for {set i 1} {$i <= 4} {incr i} {
@@ -14,8 +17,11 @@ for {set i 1} {$i <= 4} {incr i} {
 grid .f.label_1 .f.label_2
 grid .f.label_3 .f.label_4
 
-pack [label .title -text "Rendering images, please wait..."] -fill x
-pack .f -expand 1 -fill both
+
+
+pack [label .top.title -text "Click the button to render the images"] -side left
+pack [button .top.b -text "Begin" -command {.top.b configure -state disabled; .top.title configure -text "Rendering, please wait..."; . configure -cursor watch; after 32 {render 1}}] -side right
+pack .top .f -expand 1 -fill both
 
 
 proc rgb {r g b} {
@@ -54,34 +60,47 @@ proc crcl {x y r c} {
  }
 }
 
-proc render {} {
+proc render {n} {
  global img maxw maxh
- set img .image_1
- for {set x 0} {$x<$maxw} {incr x} {
-  for {set y 0} {$y<$maxh} {incr y} {
-   pixel $x $y [rgb [expr {($x ^ $y)}] [expr {($x ^ $y)<<1}] [expr {($x ^ $y)<<2}]]
+ wm title . "Image Demo: rendering $n of 4"
+ switch $n {
+  1 {
+   set img .image_1
+   for {set x 0} {$x<$maxw} {incr x} {
+    for {set y 0} {$y<$maxh} {incr y} {
+     pixel $x $y [rgb [expr {($x ^ $y)}] [expr {($x ^ $y)<<1}] [expr {($x ^ $y)<<2}]]
+    }
+   }
+  }
+  2 {
+   set img .image_2
+   time { crcl [rnd $maxw] [rnd $maxh] [rnd 76] [randomcolour] } 17
+  }
+  3 {
+   set img .image_3
+   for {set x 0} {$x<$maxw} {incr x} {
+    for {set y 0} {$y<$maxh} {incr y} {
+     pixel $x $y [randomcolour]
+    }
+   }
+  }
+  4 {
+   set img .image_4
+   for {set x 0} {$x<$maxw} {incr x} {
+    for {set y 0} {$y<$maxh} {incr y} {
+     set v [expr {-!!($x & $y)}]
+     pixel $x $y [rgb $v $v $v]
+    }
+   }
+  }
+  5 {
+   wm title . "Image Demo: completed"
+   .top.title configure -text "Thank you"
+   . configure -cursor top_left_arrow
+   .top.b configure -state normal -text "End" -command exit
+   return
   }
  }
-
- set img .image_2
- time { crcl [rnd $maxw] [rnd $maxh] [rnd 76] [randomcolour] } 17
-
- set img .image_3
- for {set x 0} {$x<$maxw} {incr x} {
-  for {set y 0} {$y<$maxh} {incr y} {
-   pixel $x $y [randomcolour]
-  }
- }
- set img .image_4
- for {set x 0} {$x<$maxw} {incr x} {
-  for {set y 0} {$y<$maxh} {incr y} {
-   set v [expr {-!!($x & $y)}]
-   pixel $x $y [rgb $v $v $v]
-  }
- }
- .title configure -text "Thank you"
- . configure -cursor top_left_arrow
+ incr n
+ after 32 "render $n"
 }
-
-. configure -cursor watch
-after 128 render
