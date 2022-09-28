@@ -1,9 +1,5 @@
 package require Tk
 
-foreach p "[image create photo .p1] [image create photo .p2] [image create photo .p3] [image create photo .p4]" {
-
-}
-
 set img .image_1
 set maxw 192
 set maxh 192
@@ -23,7 +19,7 @@ pack .f -expand 1 -fill both
 
 
 proc rgb {r g b} {
- set H \#
+ set H "#"
  return $H[format %02x [expr {int($r)&0xff}]][format %02x [expr {int($g)&0xff}]][format %02x [expr {int($b)&0xff}]]
 }
 
