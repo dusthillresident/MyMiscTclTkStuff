@@ -80,6 +80,8 @@ proc render {} {
   }
  }
  .title configure -text "Thank you"
+ . configure -cursor top_left_arrow
 }
 
+. configure -cursor watch
 after 128 render
