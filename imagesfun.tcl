@@ -5,6 +5,7 @@ wm title . "Image Demo"
 set img .image_1
 set maxw 192
 set maxh 192
+set elapsed_time 0
 
 frame .top
 frame .f
@@ -61,8 +62,9 @@ proc crcl {x y r c} {
 }
 
 proc render {n} {
- global img maxw maxh
+ global img maxw maxh elapsed_time
  wm title . "Image Demo: rendering $n of 4"
+ set elapsed_time [expr {$elapsed_time + [lindex [time {
  switch $n {
   1 {
    set img .image_1
@@ -95,12 +97,12 @@ proc render {n} {
   }
   5 {
    wm title . "Image Demo: completed"
-   .top.title configure -text "Thank you"
-   . configure -cursor top_left_arrow
+   .top.title configure -text "Completed in [expr {$elapsed_time/1000000.0}] seconds"
+   . configure -cursor left_ptr
    .top.b configure -state normal -text "End" -command exit
    return
   }
- }
+ } }] 0]}]
  incr n
  after 32 "render $n"
 }
