@@ -10,12 +10,47 @@ set PI 3.1415926535897931
 
 set rotangle 1.0
 set scalefactor 1.0
+set yinyangflip 0
 
-set mybgcol \#7f7f7f
+set yinyangcolours(bg) #7f7f7f
+set yinyangcolours(white) white
+set yinyangcolours(black) black
+image create photo bgColIcon
+image create photo whiteColIcon
+image create photo blackColIcon
+proc update_colicons {} {
+ global yinyangcolours
+ foreach img {bgColIcon blackColIcon whiteColIcon} col {bg black white} {
+  $img put $yinyangcolours($col) -to 0 0 12 12
+ }
+}
+update_colicons
+
+rename tk_chooseColor _tk_chooseColor
+proc tk_chooseColor {args} {
+ set result [eval _tk_chooseColor $args]
+ if [string length $result] {
+  return $result
+ }
+ for {set i 0} {$i<[llength $args]} {incr i} {
+  if [string match [lindex $args $i] "-initialcolor"] {
+   incr i
+   return [lindex $args $i]
+  }
+ }
+ return ""
+}
+
 set myscaleopts "-orient horizontal -command {update_display} -resolution 0.000001 -showvalue 0 -from 0 -to 1"
-pack [canvas .yinyang -width 32 -height 32 -background $mybgcol] -fill both -expand 1
+pack [canvas .yinyang -width 32 -height 32 -background $yinyangcolours(bg)] -fill both -expand 1
 pack [eval scale .siz -variable scalefactor -label "Size" $myscaleopts] -fill x
 pack [eval scale .rot -variable rotangle -label "Rotation" $myscaleopts] -fill x
+
+pack [frame .extracontrols] -fill x
+pack [checkbutton .extracontrols.flip -text "Flip" -variable yinyangflip -command {update_display 0}] -side left
+foreach img {bgColIcon whiteColIcon blackColIcon} col {bg white black} str {BG Yang Yin} {
+ pack [button .extracontrols.b_$img -compound left -text $str -command "set yinyangcolours\($col\) \[tk_chooseColor -initialcolor \$yinyangcolours($col)\]; .yinyang configure -background \$yinyangcolours(bg); update_colicons; update_display 0" -image $img] -side right
+}
 
 set mycolour white
 proc gcol {c} {
@@ -37,11 +72,12 @@ proc arc {x y r st ext} {
 }
 
 proc drawyinyang {x y r a} {
- gcol black
+ global yinyangcolours
+ gcol $yinyangcolours(black)
  circlefill $x $y $r
- gcol white
+ gcol $yinyangcolours(white)
  arc $x $y $r [expr {$::PI*1.5+$a}] $::PI
- foreach col1 {black white} col2 {white black} ang "[expr {$::PI*1.5-$a}] [expr {$::PI*0.5-$a}]" {
+ foreach col1 "$yinyangcolours(black) $yinyangcolours(white)" col2 "$yinyangcolours(white) $yinyangcolours(black)" ang "[expr {$::PI*1.5-$a+$::yinyangflip*$::PI}] [expr {$::PI*0.5-$a+$::yinyangflip*$::PI}]" {
   set xx [expr {$x+cos($ang)*$r*0.5}] 
   set yy [expr {$y+sin($ang)*$r*0.5}]
   gcol $col1
@@ -62,4 +98,4 @@ bind . <Configure> {
  update_display 0 
 }
 
-wm geometry . 256x[expr {256+84}]
+wm geometry . 280x397
