@@ -21,7 +21,7 @@ image create photo blackColIcon
 proc update_colicons {} {
  global yinyangcolours
  foreach img {bgColIcon blackColIcon whiteColIcon} col {bg black white} {
-  $img put $yinyangcolours($col) -to 0 0 12 12
+  $img put $yinyangcolours($col) -to 0 0 14 14
  }
 }
 update_colicons
@@ -49,12 +49,14 @@ pack [eval scale .rot -variable rotangle -label "Rotation" $myscaleopts] -fill x
 pack [frame .extracontrols] -fill x
 pack [checkbutton .extracontrols.flip -text "Flip" -variable yinyangflip -command {update_display 0}] -side left
 foreach img {bgColIcon whiteColIcon blackColIcon} col {bg white black} str {BG Yang Yin} {
- pack [button .extracontrols.b_$img -compound left -text $str -command "set yinyangcolours\($col\) \[tk_chooseColor -initialcolor \$yinyangcolours($col)\]; .yinyang configure -background \$yinyangcolours(bg); update_colicons; update_display 0" -image $img] -side right
+ pack [button .extracontrols.b_$img -command "set yinyangcolours\($col\) \[tk_chooseColor -title \"$str Colour\" -initialcolor \$yinyangcolours($col)\]; .yinyang configure -background \$yinyangcolours(bg); update_colicons; update_display 0" -image $img] -side right
 }
+pack [label .extracontrols.colourslabel -text "Colours"] -side right
 
 set mycolour white
 proc gcol {c} {
- set ::mycolour $c
+ global mycolour
+ set mycolour $c
 }
 
 proc cls {} { 
@@ -64,20 +66,22 @@ proc cls {} {
 }
 
 proc circlefill {x y r} {
- .yinyang create oval [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}] -fill $::mycolour -outline $::mycolour
+ global mycolour
+ .yinyang create oval [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}] -fill $mycolour -outline $mycolour
 }
 
 proc arc {x y r st ext} {
- .yinyang create arc [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}] -start [expr {$st/$::PI*180.0}] -extent [expr {$ext/$::PI*180.0}] -fill $::mycolour -outline $::mycolour
+ global mycolour PI
+ .yinyang create arc [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}] -start [expr {$st/$PI*180.0}] -extent [expr {$ext/$PI*180.0}] -fill $mycolour -outline $mycolour
 }
 
 proc drawyinyang {x y r a} {
- global yinyangcolours
+ global yinyangcolours mycolour PI yinyangflip
  gcol $yinyangcolours(black)
  circlefill $x $y $r
  gcol $yinyangcolours(white)
- arc $x $y $r [expr {$::PI*1.5+$a}] $::PI
- foreach col1 "$yinyangcolours(black) $yinyangcolours(white)" col2 "$yinyangcolours(white) $yinyangcolours(black)" ang "[expr {$::PI*1.5-$a+$::yinyangflip*$::PI}] [expr {$::PI*0.5-$a+$::yinyangflip*$::PI}]" {
+ arc $x $y $r [expr {$PI*1.5+$a}] $PI
+ foreach col1 "$yinyangcolours(black) $yinyangcolours(white)" col2 "$yinyangcolours(white) $yinyangcolours(black)" ang "[expr {$PI*1.5-$a+$yinyangflip*$PI}] [expr {$PI*0.5-$a+$yinyangflip*$PI}]" {
   set xx [expr {$x+cos($ang)*$r*0.5}] 
   set yy [expr {$y+sin($ang)*$r*0.5}]
   gcol $col1
@@ -91,7 +95,8 @@ proc update_display {nul} {
  set cw [winfo width .yinyang]
  set ch [winfo height .yinyang]
  cls
- drawyinyang [expr {$cw>>1}] [expr {$ch>>1}] [expr {(($ch<$cw ? $ch>>1 : $cw>>1)-5) * $::scalefactor }] [expr {$::rotangle*$::PI}]
+ global PI scalefactor rotangle
+ drawyinyang [expr {$cw>>1}] [expr {$ch>>1}] [expr {(($ch<$cw ? $ch>>1 : $cw>>1)-5) * $scalefactor }] [expr {$rotangle*$PI}]
 }
 
 bind . <Configure> {
