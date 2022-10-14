@@ -61,6 +61,14 @@ proc crcl {x y r c} {
  }
 }
 
+# call this to let the Tk event handler loop run for a bit, so that the GUI can update/respond while the processing is ongoing
+set wait_var 0
+proc gui_update {} {
+ global wait_var
+ after 1 set wait_var 1
+ tkwait variable wait_var
+}
+
 proc render {n} {
  global img maxw maxh elapsed_time
  wm title . "Image Demo: rendering $n of 4"
@@ -72,17 +80,23 @@ proc render {n} {
     for {set y 0} {$y<$maxh} {incr y} {
      pixel $x $y [rgb [expr {($x ^ $y)}] [expr {($x ^ $y)<<1}] [expr {($x ^ $y)<<2}]]
     }
+    if {(($x+1)&15)==0} {
+     gui_update
+    }
    }
   }
   2 {
    set img .image_2
-   time { crcl [rnd $maxw] [rnd $maxh] [rnd 76] [randomcolour] } 17
+   time { crcl [rnd $maxw] [rnd $maxh] [rnd 76] [randomcolour]; gui_update } 17
   }
   3 {
    set img .image_3
    for {set x 0} {$x<$maxw} {incr x} {
     for {set y 0} {$y<$maxh} {incr y} {
      pixel $x $y [randomcolour]
+    }
+    if {(($x+1)&15)==0} {
+     gui_update
     }
    }
   }
@@ -92,6 +106,9 @@ proc render {n} {
     for {set y 0} {$y<$maxh} {incr y} {
      set v [expr {-!!($x & $y)}]
      pixel $x $y [rgb $v $v $v]
+    }
+    if {(($x+1)&15)==0} {
+     gui_update
     }
    }
   }
