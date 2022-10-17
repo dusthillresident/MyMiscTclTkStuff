@@ -75,13 +75,13 @@ proc arc {x y r st ext} {
  .yinyang create arc [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}] -start [expr {$st/$PI*180.0}] -extent [expr {$ext/$PI*180.0}] -fill $mycolour -outline $mycolour
 }
 
-proc drawyinyang {x y r a} {
+proc drawyinyang {x y r a yin yang} {
  global yinyangcolours mycolour PI yinyangflip
- gcol $yinyangcolours(black)
+ gcol $yin
  circlefill $x $y $r
- gcol $yinyangcolours(white)
+ gcol $yang
  arc $x $y $r [expr {$PI*1.5+$a}] $PI
- foreach col1 "$yinyangcolours(black) $yinyangcolours(white)" col2 "$yinyangcolours(white) $yinyangcolours(black)" ang "[expr {$PI*1.5-$a+$yinyangflip*$PI}] [expr {$PI*0.5-$a+$yinyangflip*$PI}]" {
+ foreach col1 "$yin $yang" col2 "$yang $yin" ang "[expr {$PI*1.5-$a+$yinyangflip*$PI}] [expr {$PI*0.5-$a+$yinyangflip*$PI}]" {
   set xx [expr {$x+cos($ang)*$r*0.5}] 
   set yy [expr {$y+sin($ang)*$r*0.5}]
   gcol $col1
@@ -95,8 +95,8 @@ proc update_display {nul} {
  set cw [winfo width .yinyang]
  set ch [winfo height .yinyang]
  cls
- global PI scalefactor rotangle
- drawyinyang [expr {$cw>>1}] [expr {$ch>>1}] [expr {(($ch<$cw ? $ch>>1 : $cw>>1)-5) * $scalefactor }] [expr {$rotangle*$PI}]
+ global PI scalefactor rotangle yinyangcolours
+ drawyinyang [expr {$cw>>1}] [expr {$ch>>1}] [expr {(($ch<$cw ? $ch>>1 : $cw>>1)-5) * $scalefactor }] [expr {$rotangle*$PI}] $yinyangcolours(black) $yinyangcolours(white)
 }
 
 bind . <Configure> {
