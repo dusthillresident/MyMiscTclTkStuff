@@ -183,18 +183,18 @@ set rbh 96
 image create photo renderbuffer -width $rbw -height $rbh
 #renderbuffer put red -to 0 0 $rbw $rbh
 
-pack [frame .bottomleft.left] -side left
+pack [frame .bottomleft.left] -side left -fill x -expand 1
 foreach i {r g b} j {
   {$x / double($w)*255}
   {$y / double($h)*255}
   {($w+$h)-($x+$y)}
  } {
- pack [frame .bottomleft.left.$i]
- pack [label .bottomleft.left.$i.l -text [string toupper $i]] -side left
- pack [entry .bottomleft.left.$i.e -textvariable fn_$i] -fill x -side left
+ pack [frame .bottomleft.left.$i] -fill x
+ pack [label .bottomleft.left.$i.l -text [string toupper $i]] -side left 
+ pack [entry .bottomleft.left.$i.e -textvariable fn_$i] -fill x -side left -expand 1
  .bottomleft.left.$i.e insert 0 $j
 }
-pack [frame .bottomleft.left.control]
+pack [frame .bottomleft.left.control] -fill x
 pack [button .bottomleft.left.control.b -text Render -command {
  if [catch render resultvar] {
   tk_messageBox -title "Error" -message "The render failed.\n\nInfo: $resultvar"
