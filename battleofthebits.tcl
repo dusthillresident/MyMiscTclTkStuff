@@ -225,12 +225,10 @@ set renderProgressBar .bottomleft.left.control.p
 pack [frame .bottomleft.right -relief sunken -borderwidth 1] -fill both -expand 1 -side right
 pack [label .bottomleft.right.l -image renderbuffer] -fill both -expand 1
 
-set wait_var 0
 proc gui_update {progress} {
- global wait_var renderProgressBar
+ global renderProgressBar
  $renderProgressBar conf -value $progress
- after 1 set wait_var 1
- tkwait variable wait_var
+ update
 }
 
 proc rgb {r g b} {
