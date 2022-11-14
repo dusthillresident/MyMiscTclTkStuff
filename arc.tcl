@@ -1,5 +1,21 @@
 package require Tk
 
+if [catch {
+ text .b
+ foreach l [.b configure] {
+  if [string match "-selectbackground" [lindex $l 0]] {
+   set bg_col [lindex $l end]
+  }
+  if [string match "-foreground" [lindex $l 0]] {
+   set fg_col [lindex $l end]
+  }
+ }
+ destroy .b
+}] {
+ set bg_col red
+ set fg_col white
+}
+
 set startAng 0
 set extAng 359
 
@@ -22,8 +38,8 @@ foreach i {.a.s .b.s} {
 
 pack [ canvas .c ] -fill both -expand 1
 
-set ovalItem [ .c create oval 0 0 10 10 -outline white]
-set arcItem  [ .c create arc 0 0 10 10 -fill darkblue -outline white -start $startAng -extent $extAng ]
+set ovalItem [ .c create oval 0 0 10 10 -outline $fg_col]
+set arcItem  [ .c create arc 0 0 10 10 -fill $bg_col -outline $fg_col -start $startAng -extent $extAng ]
 
 
 if {[tk windowingsystem] eq "x11"} {
