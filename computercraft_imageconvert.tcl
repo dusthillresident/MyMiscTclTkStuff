@@ -70,6 +70,10 @@ proc convert_img_col {c} {
  return [format "%x" $p]
 }
 
+# ----------------------------------------------------------------------
+# Take a 'photo' image and output a converted ComputerCraft image string
+# ----------------------------------------------------------------------
+
 proc convert_image_to_minecraft {img} {
  global cancel
  set w [image width $img]
@@ -96,9 +100,18 @@ proc convert_image_to_minecraft {img} {
  return $out
 }
 
+# -----------------------------------------------------------
+# Create and setup the various GUI controls for the interface
+# -----------------------------------------------------------
+
+# top frame for the main action buttons
 pack [frame .f] -fill x 
+
+# the text window for the converted image string
 pack [text .t -width 0] -side left -fill both -expand 1
 .t insert 0.0 "Converted image will appear here"
+
+# the "load image" action button
 pack [button .f.b1 -text "Load image" -command {
  set cancel 0
  set f [tk_getOpenFile]
@@ -116,11 +129,15 @@ pack [button .f.b1 -text "Load image" -command {
   progress_finish
  }
 }] -side left
+
+# the "copy to clipboard" action button
 pack [button .f.b2 -text "Copy to clipboard" -command {
  clipboard clear
  clipboard append [trimFinalNewline [.t get 0.0 end]]
-}]\
-     [button .f.b3 -text "Save to file" -command {
+}] -side left
+
+# the "save" action button
+pack [button .f.b3 -text "Save to file" -command {
  set f [tk_getSaveFile]
  if {$f eq ""} {
   return
@@ -131,8 +148,10 @@ pack [button .f.b2 -text "Copy to clipboard" -command {
   puts -nonewline $fout [trimFinalNewline [.t get 0.0 end]]
   close $fout
  }
-}]\
-     [button .f.b4 -text "Update preview" -command {
+}] -side left
+
+# the "update preview" action button
+pack [button .f.b4 -text "Update preview" -command {
  set cancel 0
  if [catch {update_preview} myinfovar] {
   tk_messageBox -title "Preview render failed" -message $myinfovar
@@ -140,16 +159,26 @@ pack [button .f.b2 -text "Copy to clipboard" -command {
   set cancel 0
  }
 }] -side left
+
+# the preview zoom setting option
 pack [label .f.scl0 -text +]\
      [scale .f.sc -orient horiz -variable zoomsetting -showvalue 0 -from 0 -to 5]\
      [label .f.scl -text "Zoom -"] -side right
 set zoomsetting 2
-
+# for some reason on windows it looks like the scale gets triggered during initialisation,
+# and its command gets run, unless we wait a brief moment before assigning the command to it.
+# So I schedule the command to be assigned to the scale 176ms later.
 after 176 { .f.sc conf -command update_preview }
 
+# the frame that contains the preview image
 pack [frame .previewframe] -side right
 pack [ label .previewframe.l -text Preview ] -side top
 pack [ label .previewframe.img ] -side bottom -fill y
+
+
+# ------------------------
+# update the preview image
+# ------------------------
 
 proc update_preview {args} {
  global col_array zoomsetting cancel
@@ -213,6 +242,10 @@ proc trimFinalNewline {s} {
 }
 
 wm geometry . 640x400
+
+# -----------------------------------------------------------------------------------------
+# Progress indicator stuff that's used when working with images with more than 10000 pixels
+# -----------------------------------------------------------------------------------------
 
 proc make_progress_window {} {
  toplevel .progress
