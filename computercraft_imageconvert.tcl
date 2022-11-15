@@ -4,6 +4,22 @@
 # Generates images for 'ComputerCraft minecraft mod.
 # --------------------------------------------------
 
+# To use this software:
+#  On Windows:
+#   * Download a "Base TclKit" from here (please use Version 8.6 or later):
+#   * http://tclkits.rkeene.org/fossil/wiki/Downloads
+#   * Open the .tcl file with the TclKit exe.
+#  On Linux: 
+#   * Install Tcl/Tk (on debian/ubuntu run this command as root: "apt-get install tcl tk".
+#   * Open the .tcl file with "tclsh" or "wish".
+#  On MacOS:
+#   Use "homebrew" to install Tcl/Tk because the preinstalled version is broken.
+#   Then use the homebrew version of "wish" to open the .tcl file.
+
+# README NOTE:
+# If you get a "failed to load the image" error,
+# make sure that you're using a TclKit or version of Tcl/Tk that supports loading png images.
+
 package require Tk
 tk appname "ComputerCraft Image Conversion Tool"
 set cancel 0
@@ -112,7 +128,7 @@ pack [text .t -width 0] -side left -fill both -expand 1
 .t insert 0.0 "Converted image will appear here"
 
 # the "load image" action button
-pack [button .f.b1 -text "Load image" -command {
+pack [button .f.b1 -text "Load PNG" -command {
  set cancel 0
  set f [tk_getOpenFile]
  if {$f eq ""} {
