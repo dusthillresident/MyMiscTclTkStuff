@@ -24,22 +24,22 @@ proc colname_to_collist {name} {
 
 set c 0
 foreach i {
- #F0F0F0
- #F2B233
- #E57FD8
- #99B2F2
- #DEDE6C
- #7FCC19
- #F2B2CC
- #4C4C4C
- #999999
- #4C99B2
- #B266E5
- #3366CC
- #7F664C
- #57A64E
- #CC4C4C
- #191919
+ "#F0F0F0"
+ "#F2B233"
+ "#E57FD8"
+ "#99B2F2"
+ "#DEDE6C"
+ "#7FCC19"
+ "#F2B2CC"
+ "#4C4C4C"
+ "#999999"
+ "#4C99B2"
+ "#B266E5"
+ "#3366CC"
+ "#7F664C"
+ "#57A64E"
+ "#CC4C4C"
+ "#191919"
 } {
  set v [colname_to_collist $i]
  set col_array($c) $v
