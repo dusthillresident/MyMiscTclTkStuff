@@ -1,8 +1,8 @@
 
-# --------------------------------------------------
-# ---- ComputerCraft mod image conversion tool -----
-# Generates images for 'ComputerCraft minecraft mod.
-# --------------------------------------------------
+# ---------------------------------------------------
+# ---- ComputerCraft mod image conversion tool ------
+# Generates images for 'ComputerCraft' minecraft mod.
+# ---------------------------------------------------
 
 # To use this software:
 #  On Windows:
