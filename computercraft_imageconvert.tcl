@@ -6,7 +6,7 @@
 
 # To use this software:
 #  On Windows:
-#   * Download a "Base TclKit" from here (please use Version 8.6 or later):
+#   * Download a "Base TclKit" from here (you must use version 8.6 or later):
 #   * http://tclkits.rkeene.org/fossil/wiki/Downloads
 #   * Open the .tcl file with the TclKit exe.
 #  On Linux: 
@@ -19,6 +19,7 @@
 # README NOTE:
 # If you get a "failed to load the image" error,
 # make sure that you're using a TclKit or version of Tcl/Tk that supports loading png images.
+# You need at least version "8.6".
 
 package require Tk
 tk appname "ComputerCraft Image Conversion Tool"
