@@ -71,6 +71,9 @@ foreach i {
 # ------------------------------------------------------------------------------------------
 
 proc convert_img_col {c} {
+ if {$c eq {255 0 255}} {
+  return " "
+ }
  global col_array
  set mindiff [expr 0xffffff]
  set p 0
@@ -211,12 +214,19 @@ proc update_preview {args} {
  }
  set x 0
  set y 0
+ set odd_frame 0
  for {set i 0} {$i<$l} {incr i} {
   set c [string range $s $i $i]
   switch -- $c {
+   " " {
+    incr x
+   }
    "\n" {
     set x 0
-    incr y 2
+    # The ComputerCraft monitors' pixels appear to be roughly 1.5x as tall as they are wide.
+    # To make the preview approximately match that, double every other pixel.
+    incr y [expr {1+($odd_frame&1)}]
+    set odd_frame [expr {!$odd_frame}]
     if $doProgress {
      progress_update [expr {$i/double($l)}]
     }
