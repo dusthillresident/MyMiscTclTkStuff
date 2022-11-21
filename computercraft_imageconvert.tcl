@@ -120,21 +120,14 @@ proc convert_image_to_minecraft {img} {
  return $out
 }
 
-# -----------------------------------------------------------
-# Create and setup the various GUI controls for the interface
-# -----------------------------------------------------------
 
-# top frame for the main action buttons
-pack [frame .f] -fill x 
+# -------------------------------------------------------------
+# load_image - Load and convert an image and update the preview
+# -------------------------------------------------------------
 
-# the text window for the converted image string
-pack [text .t -width 0] -side left -fill both -expand 1
-.t insert 0.0 "Converted image will appear here"
-
-# the "load image" action button
-pack [button .f.b1 -text "Load PNG" -command {
+proc load_image {f} {
+ global cancel
  set cancel 0
- set f [tk_getOpenFile]
  if {$f eq ""} {
   return
  }
@@ -148,16 +141,32 @@ pack [button .f.b1 -text "Load PNG" -command {
   .f.b4 invoke
   progress_finish
  }
+}
+
+# -----------------------------------------------------------
+# Create and setup the various GUI controls for the interface
+# -----------------------------------------------------------
+
+# top frame for the main action buttons
+pack [frame .f] -fill x 
+
+# the text window for the converted image string
+pack [text .t -width 0] -side left -fill both -expand 1
+.t insert 0.0 "Converted image will appear here"
+
+# the "load image" action button
+pack [button .f.b1 -text "Load PNG" -command {
+ load_image [tk_getOpenFile]
 }] -side left
 
 # the "copy to clipboard" action button
-pack [button .f.b2 -text "Copy to clipboard" -command {
+pack [button .f.b2 -text "Copy" -command {
  clipboard clear
  clipboard append [trimFinalNewline [.t get 0.0 end]]
 }] -side left
 
 # the "save" action button
-pack [button .f.b3 -text "Save to file" -command {
+pack [button .f.b3 -text "Save" -command {
  set f [tk_getSaveFile]
  if {$f eq ""} {
   return
@@ -180,6 +189,9 @@ pack [button .f.b4 -text "Update preview" -command {
  }
 }] -side left
 
+set sqrPix 0
+pack [checkbutton .f.cb -text "Square pixels" -variable sqrPix -command update_preview] -side left
+
 # the preview zoom setting option
 pack [label .f.scl0 -text +]\
      [scale .f.sc -orient horiz -variable zoomsetting -showvalue 0 -from 0 -to 5]\
@@ -192,7 +204,7 @@ after 176 { .f.sc conf -command update_preview }
 
 # the frame that contains the preview image
 pack [frame .previewframe] -side right
-pack [ label .previewframe.l -text Preview ] -side top
+pack [ label .previewframe.l -text "Preview" ] -side top -fill y -expand 1
 pack [ label .previewframe.img ] -side bottom -fill y
 
 
@@ -201,7 +213,7 @@ pack [ label .previewframe.img ] -side bottom -fill y
 # ------------------------
 
 proc update_preview {args} {
- global col_array zoomsetting cancel
+ global col_array zoomsetting cancel sqrPix
  if $cancel { return }
  catch {image delete previewimage}
  image create photo previewimage
@@ -225,7 +237,7 @@ proc update_preview {args} {
     set x 0
     # The ComputerCraft monitors' pixels appear to be roughly 1.5x as tall as they are wide.
     # To make the preview approximately match that, double every other pixel.
-    incr y [expr {1+($odd_frame&1)}]
+    incr y [expr {1+($odd_frame&1&!$sqrPix)}]
     set odd_frame [expr {!$odd_frame}]
     if $doProgress {
      progress_update [expr {$i/double($l)}]
@@ -240,7 +252,7 @@ proc update_preview {args} {
      previewimage put $col_array(_$c) -to [expr {$x<<$zoomsetting}] \
                                           [expr {$y<<$zoomsetting}] \
                                           [expr {($x+1)<<$zoomsetting}] \
-                                          [expr {($y+2)<<$zoomsetting}]
+                                          [expr {($y+2-$sqrPix)<<$zoomsetting}]
     } else {
      if {![info exists warnBadData]} {
       set warnBadData ""
@@ -269,6 +281,17 @@ proc trimFinalNewline {s} {
 }
 
 wm geometry . 640x400
+
+# ---------------------
+# Drag and drop support
+# ---------------------
+
+if {![catch {package require tkdnd}]} {
+ tkdnd::drop_target register .t DND_Files
+ bind .t <<Drop:DND_Files>> {
+  load_image [lindex %D 0]
+ }
+}
 
 # -----------------------------------------------------------------------------------------
 # Progress indicator stuff that's used when working with images with more than 10000 pixels
