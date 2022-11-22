@@ -117,9 +117,6 @@ foreach i {
 # ------------------------------------------------------------------------------------------
 
 proc convert_img_col {c} {
- if {$c eq {255 0 255}} {
-  return " "
- }
  global col_array
  set mindiff [expr 0xffffff]
  set p 0
