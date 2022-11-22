@@ -25,6 +25,52 @@ package require Tk
 tk appname "ComputerCraft Image Conversion Tool"
 set cancel 0
 
+# ----------------------------------------------------------------------------
+# CONFIGURATION - edit these values to customise some details for your own use
+# ----------------------------------------------------------------------------
+
+# Do you want square pixels in the conversion preview by default?
+# 0 : No
+# 1 : Yes
+set  config_previewSquarePixelsByDefault  0
+
+# Character to use for transparent parts of input images.
+# Only the first character of this string is used.
+# You should only set it to one of these characters: "0123456789abcdef" unless you have a very specific reason to do otherwise.
+# If you set this to " " (space), the image preview will render that as a transparent pixel.
+# ComputerCraft monitors/paintutils don't support transparent images; this option is just here in case it's useful for people writing their own scripts or utilities which need support for transparency.
+set  config_transparentCharacter          "f"
+
+# Default zoom level, an integer from 0 (not zoomed) to 5 (max zoom)
+set  config_defaultZoomLevel              2
+
+# --------------------------
+# Process and sanitise config parameters
+# --------------------------
+
+# square pixels option
+if {[string is bool -strict $config_previewSquarePixelsByDefault]} {
+ set config_previewSquarePixelsByDefault [expr !!$config_previewSquarePixelsByDefault]
+} else {
+ puts "Warning: config option 'config_previewSquarePixelsByDefault' is invalid"
+ set config_previewSquarePixelsByDefault 0
+}
+set sqrPix $config_previewSquarePixelsByDefault
+
+# transparent character option
+set config_transparentCharacter [string range $config_transparentCharacter 0 0]
+if {[string length $config_transparentCharacter]==0} {
+ puts "Warning: config option 'config_transparentCharacter' is invalid"
+ set config_transparentCharacter "f"
+}
+
+# zoom setting option
+if {$config_defaultZoomLevel<0 || $config_defaultZoomLevel>5} {
+ puts "Warning: config option 'config_defaultZoomLevel' is invalid"
+ set config_defaultZoomLevel 1
+}
+set zoomsetting $config_defaultZoomLevel
+
 # ---------------------------------------------------------------------------------------------
 # Convert a named colour (eg 'magenta' or '#ff00ff') to a list of rgb values (eg '{255 0 255}')
 # ---------------------------------------------------------------------------------------------
@@ -95,7 +141,7 @@ proc convert_img_col {c} {
 # ----------------------------------------------------------------------
 
 proc convert_image_to_minecraft {img} {
- global cancel
+ global cancel config_transparentCharacter
  set w [image width $img]
  set h [image height $img]
  set doProgress [expr {$w*$h>128*128}]
@@ -105,7 +151,11 @@ proc convert_image_to_minecraft {img} {
  set out ""
  for {set y 0} {$y<$h} {incr y} {
   for {set x 0} {$x<$w} {incr x} {
-   append out [convert_img_col [$img get $x $y]]
+   if [$img transparency get $x $y] {
+    append out $config_transparentCharacter
+   } else {
+    append out [convert_img_col [$img get $x $y]]
+   }
   }
   if {$y<$h-1} { append out "\n" }
   if $doProgress {
@@ -135,8 +185,8 @@ proc load_image {f} {
  if [catch {image create photo tempimg -file $f}] {
   tk_messageBox -title "Something happened" -message "Failed to load the image"
  } else {
-  .t delete 0.0 end
-  .t insert 0.0 [convert_image_to_minecraft tempimg]
+  textwindow delete 0.0 end
+  textwindow insert 0.0 [convert_image_to_minecraft tempimg]
   if $cancel { return }
   .f.b4 invoke
   progress_finish
@@ -151,8 +201,30 @@ proc load_image {f} {
 pack [frame .f] -fill x 
 
 # the text window for the converted image string
-pack [text .t -width 0] -side left -fill both -expand 1
-.t insert 0.0 "Converted image will appear here"
+set textWindowPath .textWindowFrame.t
+pack [ frame .textWindowFrame ] -side left -fill both -expand 1
+#-exportselection 1
+grid [ text $textWindowPath -width 0 -height 0 -wrap none -xscrollcommand {.textWindowFrame.sb2 set} -yscrollcommand {.textWindowFrame.sb1 set} ] \
+     [ scrollbar .textWindowFrame.sb1 -command "$textWindowPath yview" ]
+grid [ scrollbar .textWindowFrame.sb2 -orient horiz -command "$textWindowPath xview" ]
+grid configure .textWindowFrame.sb2 -sticky ew
+grid configure .textWindowFrame.sb1 -sticky ns
+grid configure $textWindowPath -sticky nsew
+grid columnconfigure .textWindowFrame 0 -weight 1
+grid rowconfigure .textWindowFrame 0 -weight 1
+# convenient way to access the text widget
+proc textwindow {args} {
+ global textWindowPath
+ return [eval $textWindowPath $args]
+}
+textwindow insert 0.0 "0123\n4567\n89ab\ncdef"
+if {[tk windowingsystem] eq "x11"} {
+ foreach i {<Control-a> <Control-A>} {
+  bind . $i {
+   textwindow tag add sel 0.0 end
+  }
+ }
+}
 
 # the "load image" action button
 pack [button .f.b1 -text "Load PNG" -command {
@@ -162,7 +234,7 @@ pack [button .f.b1 -text "Load PNG" -command {
 # the "copy to clipboard" action button
 pack [button .f.b2 -text "Copy" -command {
  clipboard clear
- clipboard append [trimFinalNewline [.t get 0.0 end]]
+ clipboard append [trimFinalNewline [textwindow get 0.0 end]]
 }] -side left
 
 # the "save" action button
@@ -174,7 +246,7 @@ pack [button .f.b3 -text "Save" -command {
  if [catch {set fout [open $f w]}] {
   tk_messageBox -title "Something happened" -message "Failed to open file for writing"
  } else {
-  puts -nonewline $fout [trimFinalNewline [.t get 0.0 end]]
+  puts -nonewline $fout [trimFinalNewline [textwindow get 0.0 end]]
   close $fout
  }
 }] -side left
@@ -189,18 +261,15 @@ pack [button .f.b4 -text "Update preview" -command {
  }
 }] -side left
 
-set sqrPix 0
+#set sqrPix 0
 pack [checkbutton .f.cb -text "Square pixels" -variable sqrPix -command update_preview] -side left
 
 # the preview zoom setting option
 pack [label .f.scl0 -text +]\
      [scale .f.sc -orient horiz -variable zoomsetting -showvalue 0 -from 0 -to 5]\
      [label .f.scl -text "Zoom -"] -side right
-set zoomsetting 2
-# for some reason on windows it looks like the scale gets triggered during initialisation,
-# and its command gets run, unless we wait a brief moment before assigning the command to it.
-# So I schedule the command to be assigned to the scale 176ms later.
-after 176 { .f.sc conf -command update_preview }
+#set zoomsetting 2
+.f.sc conf -command update_preview
 
 # the frame that contains the preview image
 pack [frame .previewframe] -side right
@@ -218,7 +287,7 @@ proc update_preview {args} {
  catch {image delete previewimage}
  image create photo previewimage
  .previewframe.img conf -image previewimage
- set s [trimFinalNewline [.t get 0.0 end]]
+ set s [trimFinalNewline [textwindow get 0.0 end]]
  set l [string length $s]
  set doProgress [expr {$l>128*128}]
  if $doProgress {
@@ -280,15 +349,13 @@ proc trimFinalNewline {s} {
  return [string range $s 0 $l]
 }
 
-wm geometry . 640x400
-
 # ---------------------
 # Drag and drop support
 # ---------------------
 
 if {![catch {package require tkdnd}]} {
- tkdnd::drop_target register .t DND_Files
- bind .t <<Drop:DND_Files>> {
+ tkdnd::drop_target register .textWindowFrame DND_Files
+ bind .textWindowFrame <<Drop:DND_Files>> {
   load_image [lindex %D 0]
  }
 }
@@ -330,4 +397,11 @@ proc progress_finish {} {
   wm withdraw .progress
  }
 }
+
+# --------------------
+# final initialisation
+# --------------------
+
+wm geometry . 640x400
+update_preview
 
