@@ -4,19 +4,17 @@
 
 package require Tk
 
+set graph_max_size 1200
+set graph_max_size_sb $graph_max_size
+set graph_update_interval 1760
+set graph_update_interval_sb $graph_update_interval
+
 proc read_memory_info {} {
  set f [open "|free"]
  set out [read $f]
  close $f
  return $out
 }
-
-#set count 0; foreach i [read_memory_info] { puts "$count	$i"; incr count }; exit
-
-set graph_max_size 1200
-set graph_max_size_sb $graph_max_size
-set graph_update_interval 1760
-set graph_update_interval_sb $graph_update_interval
 
 set m [read_memory_info]
 set total_memory [lindex $m 7]
@@ -52,7 +50,7 @@ proc update_graph_data {} {
 }
 
 
-# prepare the GUI
+# ----------- prepare the GUI -----------------------
 pack [frame .topframe] -fill x 
 pack [labelframe .topframe.lf1 -text "Update interval (ms)"] -fill x -padx 2 -pady 2 -side left -expand 1
 pack [spinbox .topframe.lf1.sb -textvariable graph_update_interval_sb -width 4 -from 1 -to 5000 -command reconfigure_interval] -fill x 
@@ -66,7 +64,7 @@ pack [spinbox .topframe.lf2.sb -textvariable graph_max_size_sb -width 4 -from 10
 pack [canvas .c -relief sunken -borderwidth 1] -fill both -expand 1 -padx 2 -pady 2
 bind .topframe.lf1.sb <Key> reconfigure_interval
 bind .topframe.lf2.sb <Key-Return> [lindex [.topframe.lf2.sb conf -command] end]
-
+# ---------------------------------------------------
 
 proc reconfigure_interval {} {
  global graph_update_interval graph_update_interval_sb after_id
