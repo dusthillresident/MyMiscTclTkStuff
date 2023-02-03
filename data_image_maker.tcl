@@ -20,6 +20,8 @@ proc asciiListToString {input} {
 set cols { "#007" "#00f" "#070" "#077" "#07f" "#0f0" "#0f7" "#0ff"
            "#700" "#707" "#70f" "#f00" "#f07" "#f0f" "#f70" "#f77" }
 
+set stopCol "#fff"
+
 proc stringToPixelsList {input} {
  foreach i [stringToAsciiList $input] {
   lappend output [expr {$i>>4}] [expr {$i&0xf}]
@@ -44,20 +46,21 @@ proc pixelsListToPhoto {input} {
   incr wh
  }
  set p [image create photo -width $wh -height $wh]
- global cols
+ global cols stopCol
  set c 0
  foreach i $input {
   $p put [lindex $cols $i] -to [expr {$c % $wh}] [expr {$c / $wh}]
   incr c
  }
  while {$c<$wh*$wh} {
-  $p put "#000" -to [expr {$c % $wh}] [expr {$c / $wh}]
+  $p put $stopCol -to [expr {$c % $wh}] [expr {$c / $wh}]
   incr c
  }
  return $p
 }
 
 proc photoToPixelsList {p} {
+ global stopCol
  set out ""
  set w [image width $p]
  set h [image height $p]
@@ -67,7 +70,7 @@ proc photoToPixelsList {p} {
    foreach i [$p get $x $y] {
     append v [lindex {0 7 f} [expr {round($i/128.0)}]]
    }
-   if {$v eq "#000"} { return $out }
+   if {$v eq $stopCol} { return $out }
    lappend out $v
   }
  }
