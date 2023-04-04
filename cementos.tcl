@@ -50,7 +50,7 @@ proc imgToRectangleList {img} {
     # Now we must paint over white area of the rectangle we just found, so it isn't white anymore, so our rectangle finding code won't pick up the area that we've just finished mapping.
     # For fun and for visual inspection, let's paint the rectangles we found in a few different colours.
     incr rectangleCount
-    $img put [lindex {red green blue purple orange magenta cyan gold} [expr {$rectangleCount & 7}]] -to $currentX $currentY [expr {$currentX+$currentW+1}] [expr {$currentY+$currentH+1}]
+    $img put [lindex {red green blue purple orange magenta cyan gold} [expr {$rectangleCount & 7}]] -to $currentX $currentY [expr {$currentX+$currentW}] [expr {$currentY+$currentH}]
    } ;# endif
   } ;# next x
  } ;# next y
