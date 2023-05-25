@@ -90,6 +90,20 @@ proc dotProduct { a b } {
 
 
 
+proc transpose { m } {
+ set w [matrixWidth $m]
+ set h [matrixHeight $m]
+ set out [newMatrix $h $w]
+ for {set x 0} {$x<$w} {incr x} {
+  for {set y 0} {$y<$h} {incr y} {
+   matrixSet out $y $x [matrixGet $m $x $y]
+  }
+ }
+ return $out
+}
+
+
+
 proc printMatrix { m } {
  set w [matrixWidth $m]
  set h [matrixHeight $m]
@@ -109,6 +123,12 @@ proc printMatrix { m } {
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
+
+#puts [printMatrix [transpose {
+# {1 9 0}
+# {2 9 3}
+#}]]
+#exit
 
 proc demonstrate {a b} {
  puts "------------------------------\n[printMatrix $a] x\n[printMatrix $b] =\n[printMatrix [dotProduct $a $b]]------------------------------"
