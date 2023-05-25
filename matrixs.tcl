@@ -114,6 +114,11 @@ proc demonstrate {a b} {
  puts "------------------------------\n[printMatrix $a] x\n[printMatrix $b] =\n[printMatrix [dotProduct $a $b]]------------------------------"
 }
 
+if {$argc} {
+ demonstrate [lindex $argv 0] [lindex $argv 1]
+ exit
+}
+
 demonstrate {
  {1 9 0}
  {2 9 3}
@@ -132,4 +137,6 @@ demonstrate {
  {3 1 5}
  {6 9 7}
 }
+
+
 
