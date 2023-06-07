@@ -33,8 +33,8 @@ proc makeDraggableRect { canv x y w h col } {
  $canv bind $rectItem <ButtonPress-1> [string map "%canv $canv %rectItem $rectItem" {
   set tempCordsList [%canv coords %rectItem]
   lassign $tempCordsList tempX tempY tempX2 tempY2
-  set x [expr {%x+[lindex [%canv xview] 0]*[lindex [%canv cget -scrollregion] 2]}]
-  set y [expr {%y+[lindex [%canv yview] 0]*[lindex [%canv cget -scrollregion] 3]}]
+  set x [expr {[%canv canvasx %x]}]
+  set y [expr {[%canv canvasy %y]}]
   %canv addtag [list dragging \
                      [expr {$tempX-1-%x}] \
                      [expr {$tempY-1-%y}] \
@@ -64,8 +64,8 @@ proc makeDraggableRect { canv x y w h col } {
     set R [expr { !!( $dragflags & 0b0100 )}]
     set U [expr { !!( $dragflags & 0b0010 )}]
     set D [expr { !!( $dragflags & 0b1000 )}]
-    set x [expr {%x+[lindex [%canv xview] 0]*[lindex [%canv cget -scrollregion] 2]}]
-    set y [expr {%y+[lindex [%canv yview] 0]*[lindex [%canv cget -scrollregion] 3]}]
+    set x [expr {[%canv canvasx %x]}]
+    set y [expr {[%canv canvasy %y]}]
     set x1 [expr {$L ? $x : $x1} ]
     set y1 [expr {$U ? $y : $y1} ]
     set x2 [expr {$R ? $x : $x2} ]
