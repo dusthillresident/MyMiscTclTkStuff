@@ -64,10 +64,10 @@ proc update_clock {} {
  set wh [expr {$canv_w<$canv_h ? $canv_w : $canv_h}] ;# wh = the width and height of the clock face itself, it is the minimum value of the canvas width and height.
  set radius [expr {$wh*0.5-5}] ;# the clock outline's radius
  # Calculate the hand position values based on the current time
- set timenow [expr {[clock seconds] % (60*60*12)}]
- set hournow   [expr {($timenow+60*60) / (60*60*12.0)}]
- set minutenow [expr {$timenow % (60*60) / (60.0*60.0)}]
- set secondnow [expr {($timenow+1) % 60 / 60.0}]
+ lassign [clock format [clock seconds] -format {%I %M %S}] hournow minutenow secondnow
+ set secondnow [expr {[scan $secondnow %d] / 60.0}]
+ set minutenow [expr {([scan $minutenow %d]+$secondnow) / 60.0}]
+ set hournow   [expr {([scan $hournow %d]+$minutenow) / 12.0}]
  # Clear the 'clock_face' canvas so we can redraw the clock from scratch
  foreach itm [.clock_face find all] {
   .clock_face delete $itm
