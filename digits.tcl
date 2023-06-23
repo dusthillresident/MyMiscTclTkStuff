@@ -1,5 +1,8 @@
 #!/usr/bin/tclsh
 
+# A random solution finder for New York Times "digits" puzzles
+# usage: digits.tcl target_number n1 n2 n3 n4 n5 n6
+
 proc digits {target numbersGiven} {
  if {![string is integer -strict $target]} {
   error "invalid 'target'"
