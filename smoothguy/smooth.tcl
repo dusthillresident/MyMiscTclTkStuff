@@ -26,7 +26,6 @@ set current 0
 
 set pi [expr acos(0)*2]
 
-set omul 3
 set mul 3
 pack [scale .s -from 1 -to 8 -resolution 0 -variable mul -orient h] -fill x  
 
