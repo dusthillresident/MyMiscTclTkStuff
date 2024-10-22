@@ -402,6 +402,10 @@ pack [checkbutton .optionScreen.lastRow.animate -variable solverAnimate -text "A
 pack [checkbutton .optionScreen.lastRow.autoPause -variable solverAutoPause -text "Autopause"] -side left
 pack [checkbutton .optionScreen.lastRow.startPaused -variable solverStartPaused -text "Start paused"] -side left
 pack [button      .optionScreen.lastRow.flipWH -text "Rotate board" -command {
+ if { !( [string is integer -strict $selectedWidth] && [string is integer -strict $selectedHeight] ) } {
+  set selectedWidth $boardW
+  set selectedHeight $boardH
+ }
  set b $board
  set savedWH [list $selectedWidth $selectedHeight]
  set selectedWidth {}
