@@ -6,11 +6,15 @@ proc defineCmdArg { argument expectsParameter {defaultValue {}} {validTypes {}} 
  if { [info exists ::__cmdArgsData($argument)] } {return}
  set ::__cmdArgsData($argument) 1
  lappend ::__cmdArgsData(__VALID_ARGS__) $argument
- foreach var { expectsParameter defaultValue validTypes description aliases} {
+ foreach var { expectsParameter defaultValue validTypes description} {
   set ::__cmdArgsData($argument.$var) [set $var]
  }
  set ::__cmdArgsData($argument.value) $defaultValue
  set ::__cmdArgsData($argument.isUsed) 0
+ if { [info exists ::__cmdArgsData($argument.aliases)] } {
+  set aliases [concat $aliases $::__cmdArgsData($argument.aliases)]
+ }
+ set ::__cmdArgsData($argument.aliases) $aliases
  
  if {$expectsParameter} {cmdArg $argument} else {cmdArgIsUsed $argument}
 }
@@ -159,7 +163,7 @@ proc checkCmdArgs {} {
 
 
 if 0 {
- 
+ cmdArgAlias -testarg -PENIS
  if 1 {
   puts "\nLet's define the command line options:"
   defineCmdArg  -testarg  1  1234   {integer double}  {This is a test.}
