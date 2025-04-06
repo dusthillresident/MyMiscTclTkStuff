@@ -18,7 +18,7 @@ if { ! [llength $argv] } {
 }
 
 set filePath [lindex $argv 0]
-lset argv 0 __CMD_ARG_USED__
+set argv [lrange $::argv 1 end]
 
 
 
@@ -30,7 +30,7 @@ proc loadPicture {filePath width} {
  #puts "scf $scf"
  set w [expr { int( $w * $scf * 2 ) }]
  set h [expr { int( $h * $scf ) }]
- if { [cmdArgumentIsUsed -hard] } {
+ if { [cmdArgIsUsed -hard] } {
   exec convert $filePath -interpolate Integer -filter point -resize [string cat $w x $h !] /tmp/_ansi_tmpfile.png
  } else {
   exec convert $filePath -resize [string cat $w x $h !] /tmp/_ansi_tmpfile.png
@@ -40,9 +40,9 @@ proc loadPicture {filePath width} {
  file delete /tmp/_ansi_tmpfile.png
 }
 
-loadPicture $filePath [cmdArgument -width 120]
+loadPicture $filePath [cmdArg -width 120]
 
-set amplify [cmdArgumentIsUsed -amplify]
+set amplify [cmdArgIsUsed -amplify]
 
 if { $amplify } {
  set channels [lrepeat 3 {255 0}]
@@ -66,18 +66,18 @@ if { $amplify } {
  puts "amp coefficients: $ampCoefficients"
 }
 
-cmdAlias -bumpstart -bs
-cmdAlias -bumpamount -ba
-cmdAlias -bumpamount -bu
-cmdAlias -bumpdown -bd
+cmdArgAlias -bumpstart -bs
+cmdArgAlias -bumpamount -ba
+cmdArgAlias -bumpamount -bu
+cmdArgAlias -bumpdown -bd
 
-set bumpStart [cmdArgument -bumpstart 0]
-set bumpAmount [cmdArgument -bumpamount 0]
-set bumpDown [cmdArgument -bumpdown 1.0]
+set bumpStart [cmdArg -bumpstart 0]
+set bumpAmount [cmdArg -bumpamount 0]
+set bumpDown [cmdArg -bumpdown 1.0]
 set bumpDown [expr { double( $bumpDown )}]
 set bump [expr {$bumpStart || $bumpAmount}]
 
-set saturate [cmdArgument -sat 0.0]
+set saturate [cmdArg -sat 0.0]
 if { $saturate != 0.0 } {
  set saturation [expr { double($saturate) }]
  set saturate 1

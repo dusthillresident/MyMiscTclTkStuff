@@ -1,6 +1,12 @@
 #!/usr/bin/env tclsh
 
 set shades {░▒▓█}
+if { [llength $argv] == 0 } {
+ puts "Usage: $argv0 (picture)"
+ exit 1
+}
+set filePath [lindex $argv 0]
+set argv [lrange $::argv 1 end]
 
 source "cmdargs.tcl"
 
@@ -45,17 +51,6 @@ foreach i $basePalette {
  }
 }
 
-if 0 {
-set palette [concat $basePalette $extendedPalette]
-
-set n 0
-foreach i $realPalette {
-puts "fuck $i"
-#puts "$n	\{[join $i \	]\}"
- incr n
-}
-}
-
 package require Tk
 package require Img
 
@@ -67,7 +62,7 @@ proc loadPicture {filePath width} {
  #puts "scf $scf"
  set w [expr { int( $w * $scf * 2 ) }]
  set h [expr { int( $h * $scf ) }]
- if { [cmdArgumentIsUsed -hard] } {
+ if { [cmdArgIsUsed -hard] } {
   exec convert $filePath -interpolate Integer -filter point -resize [string cat $w x $h !] /tmp/_ansi_tmpfile.png
  } else {
   exec convert $filePath -resize [string cat $w x $h !] /tmp/_ansi_tmpfile.png
@@ -77,15 +72,13 @@ proc loadPicture {filePath width} {
  file delete /tmp/_ansi_tmpfile.png
 }
 
-set filePath [lindex $argv 0]
-lset argv 0 __CMD_ARG_USED__
-loadPicture $filePath [cmdArgument -width 120]
+loadPicture $filePath [cmdArg -width 120]
 
 set lastBg -1
 set lastFg -1
 
 
-set saturate [cmdArgument -sat 0.0]
+set saturate [cmdArg -sat 0.0]
 if { $saturate != 0.0 } {
  set saturation [expr { double($saturate) }]
  set saturate 1
@@ -93,9 +86,9 @@ if { $saturate != 0.0 } {
  set saturate 0
 }
 
-set sqrV [cmdArgument -sqrv 2.0]
+set sqrV [cmdArg -sqrv 2.0]
 set sqrV [expr { double( $sqrV ) }]
-set square [expr { [cmdArgumentIsUsed -sqr] || [cmdArgumentIsUsed -sqrv] }]
+set square [expr { [cmdArgIsUsed -sqr] || [cmdArgIsUsed -sqrv] }]
 
 proc doPixel {x y} {
  set c1 [img get $x $y]
