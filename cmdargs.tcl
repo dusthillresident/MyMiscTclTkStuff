@@ -15,10 +15,12 @@ proc defineCmdArg { argument expectsParameter {defaultValue {}} {validTypes {}} 
   set aliases [concat $aliases $::__cmdArgsData($argument.aliases)]
  }
  set ::__cmdArgsData($argument.aliases) $aliases
+ foreach alias $aliases {cmdArgAlias $argument $alias}
  
  if {$expectsParameter} {cmdArg $argument} else {cmdArgIsUsed $argument}
 }
 
+# make aliases for existing arguments
 proc cmdArgAlias {argument alias} {
  lappend ::__cmdArgsData($argument.aliases) $alias
  set ::argv [lmap arg $::argv {
@@ -172,13 +174,13 @@ proc checkCmdArgs {} {
 
 
 
-if 0 {
+if 1 {
  cmdArgAlias -testarg -PENIS
  if 1 {
   puts "\nLet's define the command line options:"
-  defineCmdArg  -testarg  1  1234   {integer double}  {This is a test.}
+  defineCmdArg  -testarg  1  1234   {integer double}  {This is a test.}  {-testes -magic}
   defineCmdArg  -blah     0  {}     {}                {This does nothing.}
-  defineCmdArg  -dub	 1  {-1.0} double            {This is something.}	
+  defineCmdArg  -dub	 1  {-1.0} double            {This is something.}	-dubble
   defineCmdArg	-nuts	0   {}      {}		     "Here's something."
   puts "OK"
  }
