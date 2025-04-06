@@ -111,11 +111,9 @@ proc !cmdArgsAreUsed {args} {
 proc cmdArgsUsageMessage {} {
  puts stderr "Valid command-line arguments:"
  foreach arg $::__cmdArgsData(__VALID_ARGS__) {
-  puts -nonewline stderr " $arg"
+  puts stderr " $arg"
   if { $::__cmdArgsData($arg.aliases) ne {} } {
-   puts stderr " (also known by alias(es): [join $::__cmdArgsData($arg.aliases) {, }])
-  } else {
-   puts stderr ""
+   puts stderr "    Also known by alias:\n      [join $::__cmdArgsData($arg.aliases) {, }]"
   }
   if { $::__cmdArgsData($arg.expectsParameter) } {
    puts -nonewline stderr "    Expects a parameter."
