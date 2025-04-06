@@ -1,7 +1,7 @@
 
 # Command line argument parsing and value retrieval
 
-
+# Define a command line argument
 proc defineCmdArg { argument expectsParameter {defaultValue {}} {validTypes {}} {description {}} {aliases {}} } {
  if { [info exists ::__cmdArgsData($argument)] } {return}
  set ::__cmdArgsData($argument) 1
@@ -30,12 +30,14 @@ proc cmdArgAlias {argument alias} {
  }]
 }
 
+# internal helper function: list the valid parameter types for a given argument
 proc _cmdArgListValidTypes {argument} {
  if { $::__cmdArgsData($argument.validTypes) ne {} } {
   puts stderr "valid type(s) for its parameter: [join $::__cmdArgsData($argument.validTypes) {, }]"
  }
 }
 
+# internal helper function: complain if the parameter value passed to a given argument is not an accepted type
 proc _cmdArgValidateType {argument value} {
  if { $::__cmdArgsData($argument.validTypes) eq {} } {return 1}
  set accepted 0
@@ -48,6 +50,7 @@ proc _cmdArgValidateType {argument value} {
  }
 }
 
+# internal helper function: this is used to get the value passed to an argument, and then consume (erase from $::argv) the argument and the parameter
 proc _cmdArgGetValue {index} {
  upvar argument argument
  set index2 $index; incr index2
@@ -65,7 +68,8 @@ proc _cmdArgGetValue {index} {
  return $value
 }
 
-# Get the specified parameter for command-line arguments that expect a parameter.
+# get the specified parameter for command-line arguments that expect a parameter.
+# if the argument has not been defined previously, if is defined as an argument that takes a parameter
 proc cmdArg { argument {default {}} } {
  defineCmdArg $argument 1
  if { ! $::__cmdArgsData($argument.expectsParameter) } {
@@ -84,6 +88,8 @@ proc cmdArg { argument {default {}} } {
  }
 }
 
+# tells you whether or not a given argument has been used/specified.
+# if the argument has not been defined previously, if is defined as an argument that doesn't take a parameter
 proc cmdArgIsUsed {argument} {
  defineCmdArg $argument 0
  if { $::__cmdArgsData($argument.isUsed) } {return 1}
@@ -96,6 +102,7 @@ proc cmdArgIsUsed {argument} {
  return 0
 }
 
+# tells you whether or not any one from a list of arguments have been used/specified
 proc cmdArgsAreUsed {args} {
  set result 0
  foreach i $args {
@@ -104,14 +111,17 @@ proc cmdArgsAreUsed {args} {
  return $result
 }
 
+# tells you whether or not the a given argument has NOT been used/specified
 proc !cmdArgIsUsed {argument} {
  expr {! [cmdArgIsUsed $argument] }
 }
 
+# tells you whether or not any one from a list of arguments have NOT been used/specified
 proc !cmdArgsAreUsed {args} {
  expr {! [cmdArgsAreUsed {*}$args] }
 }
 
+# print the usage message listing the recognised command-line arguments and the information about them
 proc cmdArgsUsageMessage {} {
  puts stderr "Valid command-line arguments:"
  foreach arg $::__cmdArgsData(__VALID_ARGS__) {
@@ -139,11 +149,13 @@ proc cmdArgsUsageMessage {} {
  }
 }
 
+# this can be redefined as necessary to customise the behaviour of -h
 proc cmdArgsHelp {} {
  cmdArgsUsageMessage
  exit 1
 }
 
+# check if any unrecognised arguments have been passed and complain if so
 proc checkCmdArgs {} {
  if { ![info exists ::__cmdArgsData(DISABLE_HELP)] && [lsearch -exact $::argv "--help"] != -1 } {
   cmdArgsHelp
