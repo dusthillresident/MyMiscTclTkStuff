@@ -71,7 +71,7 @@ proc _cmdArgGetValue {index} {
 # get the specified parameter for command-line arguments that expect a parameter.
 # if the argument has not been defined previously, if is defined as an argument that takes a parameter
 proc cmdArg { argument {default {}} } {
- defineCmdArg $argument 1
+ defineCmdArg $argument 1 $default
  if { ! $::__cmdArgsData($argument.expectsParameter) } {
   error "cmdArg called for argument '$argument' which is defined as not accepting a parameter"
  }
@@ -82,10 +82,8 @@ proc cmdArg { argument {default {}} } {
  if { $index != -1 } {
   set ::__cmdArgsData($argument.isUsed) 1
   set ::__cmdArgsData($argument.value) [_cmdArgGetValue $index]
-  return $::__cmdArgsData($argument.value)
- } else {
-  return $default
  }
+ return $::__cmdArgsData($argument.value)
 }
 
 # tells you whether or not a given argument has been used/specified.
@@ -190,13 +188,14 @@ if 0 {
  puts "OK"
 
  proc checkvalues {} {
- uplevel 1 {
- puts "\nLet's check the values:"
- foreach i { -testarg -dub } {
-  puts " value of $i		[cmdArg $i]"
- }
- puts "And let's check if -nuts is used: [cmdArgIsUsed -nuts]"
- }
+  uplevel 1 {
+   puts "\nLet's check the values:"
+   foreach i { -testarg -dub } {
+    puts " value of $i		[cmdArg $i someGarbageDefaultValue]"
+    puts "(test2 [cmdArg $i])"
+   }
+   puts "And let's check if -nuts is used: [cmdArgIsUsed -nuts]"
+  }
  }
  checkvalues 
 
