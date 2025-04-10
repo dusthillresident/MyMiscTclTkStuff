@@ -84,6 +84,10 @@ proc cmdArg { argument {default {}} } {
  if { $index != -1 } {
   set ::__cmdArgsData($argument.isUsed) 1
   set ::__cmdArgsData($argument.value) [_cmdArgGetValue $index]
+ } else {
+  if { $default ne {} && $default ne $::__cmdArgsData($argument.value) } {
+   return $default
+  }
  }
  return $::__cmdArgsData($argument.value)
 }
@@ -116,9 +120,17 @@ proc !cmdArgIsUsed {argument} {
  expr {! [cmdArgIsUsed $argument] }
 }
 
-# tells you whether or not any one from a list of arguments have NOT been used/specified
+# tells you if all of the arguments in the list have NOT been used/specified
 proc !cmdArgsAreUsed {args} {
  expr {! [cmdArgsAreUsed {*}$args] }
+}
+
+# internal helper function: remove duplicates from a list
+proc _removeDupes {lst} {
+ foreach i $lst {
+  set dupes($i) 1
+ }
+ return [array names dupes]
 }
 
 # print the usage message listing the recognised command-line arguments and the information about them
@@ -127,6 +139,7 @@ proc cmdArgsUsageMessage {} {
  foreach arg $::__cmdArgsData(__VALID_ARGS__) {
   puts stderr " $arg"
   if { $::__cmdArgsData($arg.aliases) ne {} } {
+   set ::__cmdArgsData($arg.aliases) [_removeDupes $::__cmdArgsData($arg.aliases)]
    puts stderr "    Also known by alias:\n      [join $::__cmdArgsData($arg.aliases) {, }]"
   }
   if { $::__cmdArgsData($arg.expectsParameter) } {
@@ -149,10 +162,17 @@ proc cmdArgsUsageMessage {} {
  }
 }
 
-# this can be redefined as necessary to customise the behaviour of -h
+# this can be redefined as necessary to customise the behaviour of --help
 proc cmdArgsHelp {} {
  cmdArgsUsageMessage
  exit 1
+}
+
+# this lets you specify how many direct command line parameters you want to allow
+proc defineDirectCmdArgs { minimumArgs {maximumArgs {}} {descriptionList {}} } {
+ if {$maximumArgs eq {}} {set maximumArgs $minimumArgs}
+ if {$maximumArgs != -1 && $minimumArgs > $maximumArgs} {error "minimum number of direct command-line parameters can't be greater than the maximum"}
+ set ::__cmdArgsData(__DIRECT_PARAMS__) [list $minimumArgs $maximumArgs $descriptionList]
 }
 
 # check if any unrecognised arguments have been passed and complain if so
@@ -161,9 +181,19 @@ proc checkCmdArgs {} {
   cmdArgsHelp
   return
  }
+ # handle direct params
+ if { [info exists ::__cmdArgsData(__DIRECT_PARAMS__)] } {
+  set ::argv [lmap i $::argv { 
+   if {$i eq "__CMD_ARG_USED__"} {continue} else {set i}
+  }]
+ }
+ # check for unknown arguments
  foreach argument $::argv {
   if { $argument ne "__CMD_ARG_USED__" } {
-   puts stderr "Unknown argument '$argument'"
+   puts -nonewline stderr "Unknown argument '$argument'"
+   if { [info exists ::__cmdArgsData(__DIRECT_PARAMS__)] } {
+    " or possibly too many command-line parameters"
+   } else {puts stderr ""}
    cmdArgsUsageMessage
    exit 1
   }
