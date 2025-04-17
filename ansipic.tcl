@@ -36,7 +36,7 @@ set width [cmdArg -width 120]
 # Enable/disable interpolation of the source image
 set hard [cmdArgIsUsed -hard]
 # Enable/disable the 'amplify' filter
-set amplify [cmdArgIsUsed -amplify]
+set amplify [cmdArgsAreUsed -amplify -ampinfo]
 # Process command-line arguments for the 'saturation' filter
 set saturate [cmdArg -sat 0.0]
 if { $saturate != 0.0 } {
@@ -98,7 +98,7 @@ proc amplify {} {
   lassign $i min max
   lappend ::ampCoefficients [list $min [expr { 255.0 / ($max - $min) }]]
  }
- puts "amp coefficients: $::ampCoefficients"
+ if {[cmdArgIsUsed -ampinfo]} {puts "amp coefficients: $::ampCoefficients"}
  set ::filters [concat filter_amplify $::filters]
 }
 
@@ -174,7 +174,6 @@ loadPicture $filePath $width
 # when amplify is enabled, we must now get the amplification coefficients
 if {$amplify} {amplify}
 # perform the conversion
-
 puts -nonewline "\x1b\[40m"
 for {set y 0} {$y < [image height img] } {incr y} {
  for {set x 0} {$x < [image width img] } {incr x} {

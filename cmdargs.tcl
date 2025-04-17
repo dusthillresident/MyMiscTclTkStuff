@@ -136,7 +136,7 @@ proc _removeDupes {lst} {
 # print the usage message listing the recognised command-line arguments and the information about them
 proc cmdArgsUsageMessage {} {
  puts stderr "Valid command-line arguments:"
- foreach arg $::__cmdArgsData(__VALID_ARGS__) {
+ foreach arg [lsort $::__cmdArgsData(__VALID_ARGS__)] {
   puts stderr " $arg"
   if { $::__cmdArgsData($arg.aliases) ne {} } {
    set ::__cmdArgsData($arg.aliases) [_removeDupes $::__cmdArgsData($arg.aliases)]
@@ -169,6 +169,7 @@ proc cmdArgsHelp {} {
 }
 
 # this lets you specify how many direct command line parameters you want to allow
+# NOT WORKING YET
 proc defineDirectCmdArgs { minimumArgs {maximumArgs {}} {descriptionList {}} } {
  if {$maximumArgs eq {}} {set maximumArgs $minimumArgs}
  if {$maximumArgs != -1 && $minimumArgs > $maximumArgs} {error "minimum number of direct command-line parameters can't be greater than the maximum"}
@@ -183,9 +184,20 @@ proc checkCmdArgs {} {
  }
  # handle direct params
  if { [info exists ::__cmdArgsData(__DIRECT_PARAMS__)] } {
+  lassign $::__cmdArgsData(__DIRECT_PARAMS__) minArgs maxArgs desc
   set ::argv [lmap i $::argv { 
    if {$i eq "__CMD_ARG_USED__"} {continue} else {set i}
   }]
+  if { [llength $::argv] < $minArgs } {
+   puts stderr "Not enough command-line parameters\nUsage:"
+   puts -nonewline stderr "$::argv0"
+   set n 1
+   for {set n 0} {$n < $minArgs} {incr n} {
+    puts -nonewline stderr " ($n: $i)"
+    incr n
+# WORKING HERE RIGHT NOW
+   }
+  }
  }
  # check for unknown arguments
  foreach argument $::argv {
