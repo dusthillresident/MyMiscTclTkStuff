@@ -608,10 +608,7 @@ proc "Pie chart" {} {
 
  # If there is a smaller files pie slice, display it now.
  if {$smallFilesExtent > 0.0} {
-
-puts "start $startAngle		extent $smallFilesExtent"
   set ::smallFilesMessage "[sizeString $smallFilesSize] : $smallFilesNumber smaller files"
-
   set thisSliceItem [.c create arc $x1 $y1 $x2 $y2 \
    -start [expr {floor($startAngle)}] \
    -extent [expr {min(ceil($smallFilesExtent),360.0)-0.000000001}] \
