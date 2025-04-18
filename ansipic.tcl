@@ -174,12 +174,15 @@ loadPicture $filePath $width
 # when amplify is enabled, we must now get the amplification coefficients
 if {$amplify} {amplify}
 # perform the conversion
+# set background colour to black
 puts -nonewline "\x1b\[40m"
 for {set y 0} {$y < [image height img] } {incr y} {
  for {set x 0} {$x < [image width img] } {incr x} {
   doPixel $x $y
  }
- puts {}
+ # restore default background colour, start new line, and then set background black again
+ puts -nonewline "\x1b\[49m\n\x1b\[40m"
 }
-
+# restore terminal default colours
+puts -nonewline "\x1b\[49m\x1b\[39m"
 exit
